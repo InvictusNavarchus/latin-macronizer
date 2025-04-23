@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Latin Wikipedia Macronizer
 // @namespace    https://github.com/InvictusNavarchus
-// @version      0.2.0
+// @version      0.2.1
 // @description  Macronizes Latin text on la.wikipedia.org using alatius.com
 // @author       Invictus
 // @match        *://la.wikipedia.org/wiki/*
@@ -117,7 +117,7 @@
     ].join(', ');
 
     const MAX_CHUNK_CHARS = 4000; // Adjust based on Alatius API limits / desired performance
-    const SEPARATOR = "|||S€PĀRĀTOR|||"; // Use a more unique separator unlikely to be affected by macronization itself
+    const SEPARATOR = "||~#~||"; // Use a more unique separator unlikely to be affected by macronization itself
 
     async function processLatinContent() {
         const contentArea = document.querySelector(contentSelector);
