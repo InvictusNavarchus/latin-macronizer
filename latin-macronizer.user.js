@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Latin Wikipedia Macronizer
 // @namespace    https://github.com/InvictusNavarchus
-// @version      0.3.0
+// @version      0.4.0
 // @description  Macronizes Latin text on la.wikipedia.org using alatius.com
 // @author       Invictus
 // @match        *://la.wikipedia.org/wiki/*
@@ -13,6 +13,8 @@
 // @grant        GM_xmlhttpRequest
 // @connect      alatius.com
 // @run-at       document-idle
+// @updateURL    https://raw.githubusercontent.com/InvictusNavarchus/latin-Macronizer/master/latin-macronizer.user.js
+// @downloadURL  https://raw.githubusercontent.com/InvictusNavarchus/latin-Macronizer/master/latin-macronizer.user.js
 // ==/UserScript==
 
 (function() {
