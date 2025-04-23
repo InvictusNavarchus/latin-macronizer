@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Latin Wikipedia Macronizer
 // @namespace    https://github.com/InvictusNavarchus
-// @version      0.1.0
+// @version      0.1.1
 // @description  Macronizes Latin text on la.wikipedia.org using an external function
 // @author       Invictus
 // @match        *://la.wikipedia.org/wiki/*
@@ -155,21 +155,32 @@
             console.log(`Macronizer: Processing chunk ${i + 1}/${chunks.length} (${joinedText.length} chars)...`);
 
             try {
-                const macronizedResult = await macronizeText(joinedText);
-                const macronizedTexts = macronizedResult.split(SEPARATOR);
+                const joinedMacronizedResult = await macronizeText(joinedText); // Result potentially contains macronized separators
+
+                // --- FIX: Replace the known macronized separator back to the original ---
+                const macronizedSeparator = "|||SĒPĀRĀTŌR|||"; // The expected result after macronizing the separator
+                // Use replaceAll to catch all occurrences if the separator somehow appears multiple times consecutively (unlikely but safe)
+                const correctedMacronizedResult = joinedMacronizedResult.replaceAll(macronizedSeparator, SEPARATOR);
+                // --- End of FIX ---
+
+                // Now split using the original, corrected separator
+                const macronizedTexts = correctedMacronizedResult.split(SEPARATOR);
 
                 if (macronizedTexts.length !== originalTexts.length) {
+                    // Keep the detailed error logging from before, but update variable names if needed
                     console.error(`Macronizer: Mismatch in chunk ${i + 1}. Original: ${originalTexts.length}, Macronized: ${macronizedTexts.length}. Skipping chunk.`);
-                    console.error("Original joined:", joinedText.substring(0,200));
-                    console.error("Received joined:", macronizedResult.substring(0,200));
+                    console.error("Original joined (start):", joinedText.substring(0,200));
+                    console.error("Received joined (start):", joinedMacronizedResult.substring(0,200)); // Log the raw API result
+                    console.error("Corrected joined (start):", correctedMacronizedResult.substring(0,200)); // Log the result after separator correction
+                    console.error("Split texts count:", macronizedTexts.length);
                     continue; // Skip this chunk
                 }
 
-                // Replace text in the original nodes
+                // Replace text in the original nodes (no changes needed here)
                 for (let j = 0; j < chunk.length; j++) {
-                    if (chunk[j].node && chunk[j].node.nodeValue === chunk[j].originalText) { // Check if node still exists and text hasn't changed
-                         chunk[j].node.nodeValue = macronizedTexts[j];
-                         processedCount++;
+                   if (chunk[j].node && chunk[j].node.nodeValue === chunk[j].originalText) {
+                        chunk[j].node.nodeValue = macronizedTexts[j];
+                        processedCount++;
                     } else {
                          console.warn("Macronizer: Node or text changed during processing, skipping replacement for:", chunk[j].originalText.substring(0,50));
                     }
