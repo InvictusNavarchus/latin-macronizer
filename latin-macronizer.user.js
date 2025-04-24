@@ -17,7 +17,7 @@
 // @downloadURL  https://raw.githubusercontent.com/InvictusNavarchus/latin-Macronizer/master/latin-macronizer.user.js
 // ==/UserScript==
 
-(function() {
+(function () {
     'use strict';
 
     console.log("Latin Macronizer Script Started");
@@ -54,7 +54,7 @@
                     // "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/9_._._._ Safari/537.36"
                 },
                 overrideMimeType: 'text/html; charset=utf-8', // Ensure correct encoding like in Python
-                onload: function(response) {
+                onload: function (response) {
                     if (response.status >= 200 && response.status < 300) {
                         try {
                             // Parse the HTML response
@@ -82,11 +82,11 @@
                         resolve(text); // Resolve with original text on HTTP error
                     }
                 },
-                onerror: function(error) {
+                onerror: function (error) {
                     console.error("Macronizer Error: GM_xmlhttpRequest failed.", error);
                     resolve(text); // Resolve with original text on network error
                 },
-                ontimeout: function() {
+                ontimeout: function () {
                     console.error("Macronizer Error: Request to Alatius timed out.");
                     resolve(text); // Resolve with original text on timeout
                 }
@@ -133,7 +133,7 @@
             contentArea,
             NodeFilter.SHOW_TEXT, // Only interested in text nodes
             {
-                acceptNode: function(node) {
+                acceptNode: function (node) {
                     // 1. Ignore empty/whitespace-only nodes
                     if (!node.nodeValue.trim()) {
                         return NodeFilter.FILTER_REJECT;
@@ -146,14 +146,14 @@
                     // 3. Basic Latin character check (optional but helpful)
                     //    Only process nodes containing at least one vowel (likely Latin)
                     if (!/[aeiouyAEIOUYāēīōūȳĀĒĪŌŪȲ]/.test(node.nodeValue)) {
-                         // console.log("Rejecting node with no vowels:", node.nodeValue.trim().substring(0, 30));
+                        // console.log("Rejecting node with no vowels:", node.nodeValue.trim().substring(0, 30));
                         return NodeFilter.FILTER_REJECT;
                     }
-                     // 4. Reject if it looks like a URL
-                     if (/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(node.nodeValue.trim())) {
-                          // console.log("Rejecting node that looks like a URL:", node.nodeValue.trim().substring(0, 50));
-                         return NodeFilter.FILTER_REJECT;
-                     }
+                    // 4. Reject if it looks like a URL
+                    if (/^(https?|ftp):\/\/[^\s/$.?#].[^\s]*$/i.test(node.nodeValue.trim())) {
+                        // console.log("Rejecting node that looks like a URL:", node.nodeValue.trim().substring(0, 50));
+                        return NodeFilter.FILTER_REJECT;
+                    }
 
 
                     // If it passes all checks, accept it
@@ -182,11 +182,11 @@
 
         for (const item of nodesToProcess) {
             const textLength = item.originalText.length;
-             // Ensure single nodes that exceed the limit are handled (though unlikely for text nodes)
+            // Ensure single nodes that exceed the limit are handled (though unlikely for text nodes)
             if (textLength > MAX_CHUNK_CHARS) {
-                 console.warn(`Macronizer: Single text node exceeds MAX_CHUNK_CHARS (${textLength} > ${MAX_CHUNK_CHARS}). Skipping this node: "${item.originalText.substring(0,100)}..."`);
-                 continue; // Skip this large node
-             }
+                console.warn(`Macronizer: Single text node exceeds MAX_CHUNK_CHARS (${textLength} > ${MAX_CHUNK_CHARS}). Skipping this node: "${item.originalText.substring(0, 100)}..."`);
+                continue; // Skip this large node
+            }
             if (currentCharCount + textLength + SEPARATOR.length > MAX_CHUNK_CHARS && currentChunk.length > 0) {
                 // Finalize current chunk and start a new one
                 chunks.push(currentChunk);
@@ -221,22 +221,22 @@
 
                 // The API might sometimes add extra whitespace, trim the result AND the separator parts
                 const macronizedTexts = joinedMacronizedResult.split(SEPARATOR).map(s => s.trim());
-                 const originalTrimmedTexts = originalTexts.map(s => s.trim());
+                const originalTrimmedTexts = originalTexts.map(s => s.trim());
 
 
                 if (macronizedTexts.length !== originalTexts.length) {
-                     // Attempt recovery if the only difference is an empty string at the end from trailing separator
-                     if (macronizedTexts.length === originalTexts.length + 1 && macronizedTexts[macronizedTexts.length - 1] === '') {
-                         macronizedTexts.pop(); // Remove the trailing empty string
-                         console.warn(`Macronizer: Corrected split mismatch for chunk ${i + 1} by removing trailing empty string.`);
-                     } else {
-                         console.error(`Macronizer: Mismatch in chunk ${i + 1}. Original items: ${originalTexts.length}, Macronized items: ${macronizedTexts.length}. Skipping chunk.`);
-                         console.error("Original joined (start):", joinedText.substring(0,200));
-                         console.error("Received joined (start):", joinedMacronizedResult.substring(0,200));
-                         console.error("Original texts sample:", originalTexts.slice(0, 3));
-                         console.error("Macronized texts sample:", macronizedTexts.slice(0, 3));
-                         continue; // Skip this chunk
-                     }
+                    // Attempt recovery if the only difference is an empty string at the end from trailing separator
+                    if (macronizedTexts.length === originalTexts.length + 1 && macronizedTexts[macronizedTexts.length - 1] === '') {
+                        macronizedTexts.pop(); // Remove the trailing empty string
+                        console.warn(`Macronizer: Corrected split mismatch for chunk ${i + 1} by removing trailing empty string.`);
+                    } else {
+                        console.error(`Macronizer: Mismatch in chunk ${i + 1}. Original items: ${originalTexts.length}, Macronized items: ${macronizedTexts.length}. Skipping chunk.`);
+                        console.error("Original joined (start):", joinedText.substring(0, 200));
+                        console.error("Received joined (start):", joinedMacronizedResult.substring(0, 200));
+                        console.error("Original texts sample:", originalTexts.slice(0, 3));
+                        console.error("Macronized texts sample:", macronizedTexts.slice(0, 3));
+                        continue; // Skip this chunk
+                    }
                 }
 
                 // Replace text in the original nodes
@@ -247,26 +247,26 @@
                         // Only replace if the macronized version is actually different
                         if (chunk[j].originalText.trim() !== macronizedTexts[j] && macronizedTexts[j].length > 0) {
                             // Preserve leading/trailing whitespace from the original node if the core content was modified
-                             const leadingSpace = chunk[j].originalText.match(/^\s*/)[0];
-                             const trailingSpace = chunk[j].originalText.match(/\s*$/)[0];
-                             chunk[j].node.nodeValue = leadingSpace + macronizedTexts[j] + trailingSpace;
+                            const leadingSpace = chunk[j].originalText.match(/^\s*/)[0];
+                            const trailingSpace = chunk[j].originalText.match(/\s*$/)[0];
+                            chunk[j].node.nodeValue = leadingSpace + macronizedTexts[j] + trailingSpace;
                             modifiedCount++;
-                         } else if (macronizedTexts[j].length === 0 && chunk[j].originalText.trim().length > 0) {
-                              console.warn(`Macronizer: API returned empty string for non-empty input in chunk ${i+1}, item ${j}. Original: "${chunk[j].originalText.substring(0,50)}"`);
-                         }
+                        } else if (macronizedTexts[j].length === 0 && chunk[j].originalText.trim().length > 0) {
+                            console.warn(`Macronizer: API returned empty string for non-empty input in chunk ${i + 1}, item ${j}. Original: "${chunk[j].originalText.substring(0, 50)}"`);
+                        }
                     } else {
-                         // Node content might have changed dynamically between collection and processing
-                        console.warn(`Macronizer: Node content changed or node removed before replacement could occur for chunk ${i+1}, item ${j}. Original: "${chunk[j].originalText.substring(0,50)}"`);
+                        // Node content might have changed dynamically between collection and processing
+                        console.warn(`Macronizer: Node content changed or node removed before replacement could occur for chunk ${i + 1}, item ${j}. Original: "${chunk[j].originalText.substring(0, 50)}"`);
                     }
                 }
-                 console.log(`Macronizer: Chunk ${i + 1} processed.`);
+                console.log(`Macronizer: Chunk ${i + 1} processed.`);
 
             } catch (error) {
                 // This catch block might be redundant if macronizeText handles its errors, but good for safety.
                 console.error(`Macronizer: Error processing chunk ${i + 1}:`, error);
             }
-             // Optional delay between chunks to be even nicer to the API
-             // await new Promise(resolve => setTimeout(resolve, 250)); // 250ms delay
+            // Optional delay between chunks to be even nicer to the API
+            // await new Promise(resolve => setTimeout(resolve, 250)); // 250ms delay
         }
 
         console.log(`Macronizer: Finished. Checked ${processedCount} nodes, modified ${modifiedCount} nodes out of ${nodesToProcess.length} total relevant nodes.`);
@@ -280,25 +280,25 @@
         let relevantChange = false;
         for (const mutation of mutations) {
             if (mutation.type === 'childList') {
-                 if (mutation.addedNodes.length > 0) {
-                     relevantChange = true;
-                     break;
-                 }
+                if (mutation.addedNodes.length > 0) {
+                    relevantChange = true;
+                    break;
+                }
             }
-             // Add characterData if needed, but can be noisy
-             // if (mutation.type === 'characterData') {
-             //    relevantChange = true;
-             //    break;
-             // }
+            // Add characterData if needed, but can be noisy
+            // if (mutation.type === 'characterData') {
+            //    relevantChange = true;
+            //    break;
+            // }
         }
 
         if (relevantChange) {
-             // Debounce the processing function
-             clearTimeout(debounceTimer);
-             debounceTimer = setTimeout(() => {
-                 console.log("Macronizer: Detected DOM changes, re-processing content...");
-                 processLatinContent();
-             }, 1000); // Wait 1 second after the last change
+            // Debounce the processing function
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                console.log("Macronizer: Detected DOM changes, re-processing content...");
+                processLatinContent();
+            }, 1000); // Wait 1 second after the last change
         }
     });
 
@@ -309,9 +309,9 @@
         // Initial run
         processLatinContent();
     } else {
-         // If content loads later, try waiting for it (basic)
-         window.addEventListener('load', processLatinContent);
-         console.warn("Macronizer: Content area not immediately found. Will try on window load.");
+        // If content loads later, try waiting for it (basic)
+        window.addEventListener('load', processLatinContent);
+        console.warn("Macronizer: Content area not immediately found. Will try on window load.");
     }
 
 
