@@ -1,6 +1,7 @@
 # Latin Wikipedia Macronizer 📚
 
 [![Version](https://img.shields.io/badge/Version-0.5.0-blue.svg)](latin-macronizer.user.js)
+
 A userscript that automatically adds macrons (diacritics indicating long vowels) to Latin text on Latin Wikipedia (la.wikipedia.org) pages by utilizing the external Alatius macronization service.
 
 ---
