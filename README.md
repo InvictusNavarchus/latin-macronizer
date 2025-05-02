@@ -1,11 +1,11 @@
-# Latin Wikipedia Macronizer
+# Latin Wikipedia Macronizer 📚
 
 [![Version](https://img.shields.io/badge/Version-0.5.0-blue.svg)](latin-macronizer.user.js)
 A userscript that automatically adds macrons (diacritics indicating long vowels) to Latin text on Latin Wikipedia (la.wikipedia.org) pages by utilizing the external Alatius macronization service.
 
 ---
 
-## Table of Contents
+## 📋 Table of Contents
 
 * [Overview](#overview)
 * [Features](#features)
@@ -21,13 +21,13 @@ A userscript that automatically adds macrons (diacritics indicating long vowels)
 
 ---
 
-## Overview
+## 🔎 Overview
 
 This userscript enhances the experience of reading Latin Wikipedia by automatically processing the text content of articles and adding macrons where appropriate. It achieves this by sending text fragments to the `alatius.com` online macronizer tool and integrating the results back into the page. A status overlay provides feedback during the process.
 
 ---
 
-## Features
+## ✨ Features
 
 * **Automatic Macronization:** Adds macrons to Latin text within the main content area of `la.wikipedia.org/wiki/*` pages upon page load.
 * **External Service Integration:** Leverages the `alatius.com/macronizer/` service for text processing.
@@ -43,7 +43,7 @@ This userscript enhances the experience of reading Latin Wikipedia by automatica
 
 ---
 
-## Screenshot
+## 📸 Screenshot
 
 *[Please replace this section with an actual screenshot or GIF demonstrating the script in action. Show an example of macronized text and the status overlay.]*
 
@@ -53,7 +53,7 @@ This userscript enhances the experience of reading Latin Wikipedia by automatica
 
 ---
 
-## Installation
+## 💾 Installation
 
 1.  **Install a Userscript Manager:** You need a browser extension that can manage userscripts. Popular options include:
     * [Tampermonkey](https://www.tampermonkey.net/) (Chrome, Firefox, Edge, Safari, Opera)
@@ -71,7 +71,7 @@ This userscript enhances the experience of reading Latin Wikipedia by automatica
 
 ---
 
-## Usage
+## 🚀 Usage
 
 Once installed, the script runs automatically when you visit a Latin Wikipedia page matching the `*://la.wikipedia.org/wiki/*` pattern (excluding specified namespaces like `Specialis:`, `Vicipaedia:`, `Formula:`, etc.).
 
@@ -83,7 +83,7 @@ Once installed, the script runs automatically when you visit a Latin Wikipedia p
 
 ---
 
-## How it Works
+## ⚙️ How it Works
 
 1.  **Initialization:** The script runs at `document-idle`, ensuring most of the initial page structure is available.
 2.  **Content Selection:**
@@ -116,7 +116,7 @@ Once installed, the script runs automatically when you visit a Latin Wikipedia p
 
 ---
 
-## Dependencies and Requirements
+## 🔧 Dependencies and Requirements
 
 * **Userscript Manager:** An extension like Tampermonkey, Violentmonkey, or Greasemonkey must be installed in your browser.
 * **Browser:** A modern web browser compatible with userscript managers (e.g., Chrome, Firefox, Edge).
@@ -125,7 +125,7 @@ Once installed, the script runs automatically when you visit a Latin Wikipedia p
 
 ---
 
-## Limitations and Known Issues
+## ⚠️ Limitations and Known Issues
 
 * **Dependency on Alatius:** The script relies entirely on the `alatius.com` service.
     * **Availability:** If the Alatius service is down or changes its API/HTML structure, the script will fail.
@@ -139,7 +139,7 @@ Once installed, the script runs automatically when you visit a Latin Wikipedia p
 
 ---
 
-## Contributing
+## 👥 Contributing
 
 Contributions are welcome! If you find bugs, have suggestions for improvements, or want to add features:
 
@@ -150,12 +150,12 @@ Contributions are welcome! If you find bugs, have suggestions for improvements, 
 
 ---
 
-## License
+## 📄 License
 
 This project is licensed under the GNU General Public License v3 - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## Acknowledgements
+## 🙏 Acknowledgements
 
 * This script relies heavily on the excellent **[Alatius Macronizer](https://alatius.com/macronizer/)** service for performing the Latin text macronization. Many thanks to the creators of Alatius.
