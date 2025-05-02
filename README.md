@@ -158,4 +158,4 @@ This project is licensed under the GNU General Public License v3 - see the [LICE
 
 ## 🙏 Acknowledgements
 
-* This script relies heavily on the excellent **[Alatius Macronizer](https://alatius.com/macronizer/)** service for performing the Latin text macronization. Many thanks to the creators of Alatius.
+* This script relies heavily on the excellent **[Alatius Macronizer](https://alatius.com/macronizer/)** service for performing the Latin text macronization. Many thanks to [Johan Winge](https://github.com/Alatius), as the creator of Alatius.
