@@ -6,21 +6,6 @@ A userscript that automatically adds macrons (diacritics indicating long vowels)
 
 ---
 
-## 📋 Table of Contents
-
-* [Overview](#overview)
-* [Features](#features)
-* [Installation](#installation)
-* [Usage](#usage)
-* [How it Works](#how-it-works)
-* [Dependencies and Requirements](#dependencies-and-requirements)
-* [Limitations and Known Issues](#limitations-and-known-issues)
-* [Contributing](#contributing)
-* [License](#license)
-* [Acknowledgements](#acknowledgements)
-
----
-
 ## 🔎 Overview
 
 This userscript enhances the experience of reading Latin Wikipedia by automatically processing the text content of articles and adding macrons where appropriate. It achieves this by sending text fragments to the `alatius.com` online macronizer tool and integrating the results back into the page. A status overlay provides feedback during the process.
