@@ -9,7 +9,6 @@ A userscript that automatically adds macrons (diacritics indicating long vowels)
 
 * [Overview](#overview)
 * [Features](#features)
-* [Screenshot](#screenshot)
 * [Installation](#installation)
 * [Usage](#usage)
 * [How it Works](#how-it-works)
@@ -40,16 +39,6 @@ This userscript enhances the experience of reading Latin Wikipedia by automatica
 * **Chunking:** Splits large pages into manageable chunks (`MAX_CHUNK_CHARS = 20000`) to avoid overwhelming the external API.
 * **Dynamic Content Handling:** Uses a `MutationObserver` to detect and re-process content added to the page dynamically after the initial load (debounced to prevent excessive processing).
 * **Error Handling:** Includes basic error handling for network requests, API response parsing, and chunk processing mismatches. Attempts to recover or skip problematic segments without halting execution entirely.
-
----
-
-## 📸 Screenshot
-
-*[Please replace this section with an actual screenshot or GIF demonstrating the script in action. Show an example of macronized text and the status overlay.]*
-
-**(Example Placeholder Image)**
-![Placeholder Screenshot](https://via.placeholder.com/600x400.png?text=Macronizer+In+Action+Screenshot+Here)
-*Caption: Example of a Latin Wikipedia page before and after macronization, with the status overlay visible.*
 
 ---
 
