@@ -5,6 +5,7 @@
 // @description  Macronizes Latin text on la.wikipedia.org using alatius macronizer
 // @author       Invictus
 // @match        *://la.wikipedia.org/wiki/*
+// @match        *://la.m.wikipedia.org/wiki/*
 // @grant        GM_xmlhttpRequest
 // @connect      latinmacronizer.navarchus.id
 // @run-at       document-idle
