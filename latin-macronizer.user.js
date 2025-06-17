@@ -2,7 +2,7 @@
 // @name         Latin Wikipedia Macronizer
 // @namespace    https://github.com/InvictusNavarchus
 // @version      0.5.0
-// @description  Macronizes Latin text on la.wikipedia.org using alatius.com
+// @description  Macronizes Latin text on la.wikipedia.org using alatius macronizer
 // @author       Invictus
 // @match        *://la.wikipedia.org/wiki/*
 // @exclude      *://la.wikipedia.org/wiki/Specialis:*
