@@ -26,6 +26,7 @@
     const MAX_CHUNK_CHARS = 1000;
     const SEPARATOR = "||~#~||";
     const API_CONFIG = {
+        url: 'https://latinmacronizer.navarchus.id/api/macronize',
         domacronize: true,
         performutov: true,
         alsomaius: false,
@@ -286,15 +287,16 @@
      */
     function macronizeText(text) {
         return new Promise((resolve, reject) => {
+            const { url, ...apiParams } = API_CONFIG;
             GM_xmlhttpRequest({
                 method: 'POST',
-                url: 'https://latinmacronizer.navarchus.id/api/macronize',
+                url: url,
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 data: JSON.stringify({
                     text_to_macronize: text,
-                    ...API_CONFIG
+                    ...apiParams
                 }),
                 onload: function(response) {
                     try {
