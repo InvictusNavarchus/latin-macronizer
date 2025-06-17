@@ -244,6 +244,42 @@
     }
 
     /**
+     * Validates the structure of the API response
+     * @param {Object} responseData - The parsed response data from the API
+     * @returns {Object} Validation result with isValid flag and error message
+     */
+    function validateApiResponse(responseData) {
+        // Check if response is an object
+        if (!responseData || typeof responseData !== 'object') {
+            return {
+                isValid: false,
+                error: 'Response is not a valid object'
+            };
+        }
+
+        // Check for required field
+        if (!responseData.hasOwnProperty('macronized_text')) {
+            return {
+                isValid: false,
+                error: 'Response missing required field: macronized_text'
+            };
+        }
+
+        // Check if macronized_text is a string
+        if (typeof responseData.macronized_text !== 'string') {
+            return {
+                isValid: false,
+                error: 'macronized_text field is not a string'
+            };
+        }
+
+        return {
+            isValid: true,
+            error: null
+        };
+    }
+
+    /**
      * Sends text to the Latin Macronizer API and returns macronized text
      * @param {string} text - The Latin text to macronize
      * @returns {Promise<string>} - Promise that resolves to macronized text
@@ -264,12 +300,30 @@
                     try {
                         if (response.status === 200) {
                             const data = JSON.parse(response.responseText);
+                            
+                            // Validate response structure
+                            const validation = validateApiResponse(data);
+                            if (!validation.isValid) {
+                                console.error('Macronizer: Invalid API response structure:', validation.error);
+                                console.error('Macronizer: Received response:', data);
+                                reject(new Error(`Invalid API response: ${validation.error}`));
+                                return;
+                            }
+
                             resolve(data.macronized_text);
                         } else {
-                            const errorData = JSON.parse(response.responseText);
-                            reject(new Error(`API Error: ${errorData.detail || 'Unknown error'}`));
+                            let errorMessage = 'Unknown error';
+                            try {
+                                const errorData = JSON.parse(response.responseText);
+                                errorMessage = errorData.detail || errorData.message || 'API returned error status';
+                            } catch (parseError) {
+                                errorMessage = `HTTP ${response.status}: ${response.statusText || 'Unknown error'}`;
+                            }
+                            reject(new Error(`API Error: ${errorMessage}`));
                         }
                     } catch (error) {
+                        console.error('Macronizer: Failed to parse API response:', error);
+                        console.error('Macronizer: Raw response:', response.responseText);
                         reject(new Error(`Failed to parse response: ${error.message}`));
                     }
                 },
