@@ -21,6 +21,10 @@
     'use strict';
 
     console.log("Latin Macronizer Script Started");
+    
+    // Constants Configuration
+    const MAX_CHUNK_CHARS = 20000;
+    const SEPARATOR = "||~#~||";
 
     // Create and initialize status overlay
     const statusOverlay = createStatusOverlay();
@@ -293,9 +297,6 @@
         'table',
         'dl', 'dt', 'dd'
     ].join(', ');
-
-    const MAX_CHUNK_CHARS = 20000;
-    const SEPARATOR = "||~#~||";
 
     async function processLatinContent() {
         statusOverlay.show();
