@@ -23,7 +23,7 @@
     console.log("Latin Macronizer Script Started");
     
     // Constants Configuration
-    const MAX_CHUNK_CHARS = 20000;
+    const MAX_CHUNK_CHARS = 1000;
     const SEPARATOR = "||~#~||";
 
     // Create and initialize status overlay
