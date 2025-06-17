@@ -25,6 +25,13 @@
     // Constants Configuration
     const MAX_CHUNK_CHARS = 1000;
     const SEPARATOR = "||~#~||";
+    const API_CONFIG = {
+        domacronize: true,
+        performutov: true,
+        alsomaius: false,
+        scan_option_index: 0,
+        performitoj: false
+    };
 
     // Create and initialize status overlay
     const statusOverlay = createStatusOverlay();
@@ -251,11 +258,7 @@
                 },
                 data: JSON.stringify({
                     text_to_macronize: text,
-                    domacronize: true,
-                    performutov: true,
-                    alsomaius: false,
-                    scan_option_index: 0,
-                    performitoj: false
+                    ...API_CONFIG
                 }),
                 onload: function(response) {
                     try {
