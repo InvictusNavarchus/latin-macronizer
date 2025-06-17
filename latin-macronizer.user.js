@@ -5,11 +5,6 @@
 // @description  Macronizes Latin text on la.wikipedia.org using alatius macronizer
 // @author       Invictus
 // @match        *://la.wikipedia.org/wiki/*
-// @exclude      *://la.wikipedia.org/wiki/Specialis:*
-// @exclude      *://la.wikipedia.org/wiki/Vicipaedia:*
-// @exclude      *://la.wikipedia.org/wiki/Formula:*
-// @exclude      *://la.wikipedia.org/wiki/Categoria:*
-// @exclude      *://la.wikipedia.org/wiki/Fasciculus:*
 // @grant        GM_xmlhttpRequest
 // @connect      latinmacronizer.navarchus.id
 // @run-at       document-idle
