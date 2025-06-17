@@ -11,7 +11,7 @@
 // @exclude      *://la.wikipedia.org/wiki/Categoria:*
 // @exclude      *://la.wikipedia.org/wiki/Fasciculus:*
 // @grant        GM_xmlhttpRequest
-// @connect      alatius.com
+// @connect      latinmacronizer.navarchus.id
 // @run-at       document-idle
 // @updateURL    https://raw.githubusercontent.com/InvictusNavarchus/latin-Macronizer/master/latin-macronizer.user.js
 // @downloadURL  https://raw.githubusercontent.com/InvictusNavarchus/latin-Macronizer/master/latin-macronizer.user.js
@@ -233,73 +233,41 @@
     }
 
     /**
-     * Sends text to the Alatius macronizer API and returns the macronized version.
-     * Uses GM_xmlhttpRequest for cross-origin requests.
-     * @param {string} text The Latin text to macronize.
-     * @returns {Promise<string>} A promise that resolves with the macronized text,
-     * or the original text if an error occurs.
+     * Sends text to the Latin Macronizer API and returns macronized text
+     * @param {string} text - The Latin text to macronize
+     * @returns {Promise<string>} - Promise that resolves to macronized text
      */
-    async function macronizeText(text) {
-        const url = 'https://alatius.com/macronizer/';
-        // Form data based on the Python script
-        const params = new URLSearchParams();
-        params.append('textcontent', text);
-        params.append('macronize', 'on'); // Ensure macronization is enabled
-        params.append('scan', '0');      // Based on Python script's form_data
-        params.append('utov', 'on');      // Based on Python script's form_data ('u' to 'v' conversion?)
-
-        console.log(`Macronizing via Alatius: "${text.substring(0, 60).replace(/\n/g, ' ')}..."`);
-        statusOverlay.updateStatus(`Sending text to Alatius macronizer...`);
-
+    function macronizeText(text) {
         return new Promise((resolve, reject) => {
             GM_xmlhttpRequest({
-                method: "POST",
-                url: url,
-                data: params.toString(), // Send data as URL-encoded string
+                method: 'POST',
+                url: 'https://latinmacronizer.navarchus.id/api/macronize',
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
+                    'Content-Type': 'application/json'
                 },
-                overrideMimeType: 'text/html; charset=utf-8', // Ensure correct encoding like in Python
-                onload: function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        try {
-                            // Parse the HTML response
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(response.responseText, 'text/html');
-
-                            // Find the element containing the macronized text (based on parse_html.py)
-                            const targetElement = doc.querySelector('div.prewrap');
-
-                            if (targetElement) {
-                                const macronized = targetElement.textContent;
-                                statusOverlay.updateStatus("Received macronized text");
-                                resolve(macronized);
-                            } else {
-                                console.error("Macronizer Error: Could not find 'div.prewrap' in Alatius response.");
-                                console.error("Response HTML (snippet):", response.responseText.substring(0, 500));
-                                statusOverlay.updateStatus("Error: Could not parse Alatius response");
-                                resolve(text); // Resolve with original text on parsing failure
-                            }
-                        } catch (parseError) {
-                            console.error("Macronizer Error: Failed to parse Alatius response.", parseError);
-                            statusOverlay.updateStatus("Error: Failed to parse response");
-                            resolve(text); // Resolve with original text on parsing error
+                data: JSON.stringify({
+                    text_to_macronize: text,
+                    domacronize: true,
+                    performutov: true,
+                    alsomaius: false,
+                    scan_option_index: 0,
+                    performitoj: false
+                }),
+                onload: function(response) {
+                    try {
+                        if (response.status === 200) {
+                            const data = JSON.parse(response.responseText);
+                            resolve(data.macronized_text);
+                        } else {
+                            const errorData = JSON.parse(response.responseText);
+                            reject(new Error(`API Error: ${errorData.detail || 'Unknown error'}`));
                         }
-                    } else {
-                        console.error(`Macronizer Error: Alatius request failed with status ${response.status} ${response.statusText}`);
-                        statusOverlay.updateStatus(`Error: Request failed (${response.status})`);
-                        resolve(text); // Resolve with original text on HTTP error
+                    } catch (error) {
+                        reject(new Error(`Failed to parse response: ${error.message}`));
                     }
                 },
-                onerror: function (error) {
-                    console.error("Macronizer Error: GM_xmlhttpRequest failed.", error);
-                    statusOverlay.updateStatus("Error: Network request failed");
-                    resolve(text); // Resolve with original text on network error
-                },
-                ontimeout: function () {
-                    console.error("Macronizer Error: Request to Alatius timed out.");
-                    statusOverlay.updateStatus("Error: Request timed out");
-                    resolve(text); // Resolve with original text on timeout
+                onerror: function() {
+                    reject(new Error('Network error occurred'));
                 }
             });
         });
