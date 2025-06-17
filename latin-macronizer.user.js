@@ -2,7 +2,7 @@
 // @name         Latin Wikipedia Macronizer
 // @namespace    https://github.com/InvictusNavarchus
 // @version      0.5.0
-// @description  Macronizes Latin text on la.wikipedia.org using alatius.com
+// @description  Macronizes Latin text on la.wikipedia.org using alatius macronizer
 // @author       Invictus
 // @match        *://la.wikipedia.org/wiki/*
 // @exclude      *://la.wikipedia.org/wiki/Specialis:*
@@ -11,7 +11,7 @@
 // @exclude      *://la.wikipedia.org/wiki/Categoria:*
 // @exclude      *://la.wikipedia.org/wiki/Fasciculus:*
 // @grant        GM_xmlhttpRequest
-// @connect      alatius.com
+// @connect      latinmacronizer.navarchus.id
 // @run-at       document-idle
 // @updateURL    https://raw.githubusercontent.com/InvictusNavarchus/latin-Macronizer/master/latin-macronizer.user.js
 // @downloadURL  https://raw.githubusercontent.com/InvictusNavarchus/latin-Macronizer/master/latin-macronizer.user.js
@@ -21,6 +21,18 @@
     'use strict';
 
     console.log("Latin Macronizer Script Started");
+    
+    // Constants Configuration
+    const MAX_CHUNK_CHARS = 1000;
+    const SEPARATOR = "||~#~||";
+    const API_CONFIG = {
+        url: 'https://latinmacronizer.navarchus.id/api/macronize',
+        domacronize: true,
+        performutov: true,
+        alsomaius: false,
+        scan_option_index: 0,
+        performitoj: false
+    };
 
     // Create and initialize status overlay
     const statusOverlay = createStatusOverlay();
@@ -233,73 +245,92 @@
     }
 
     /**
-     * Sends text to the Alatius macronizer API and returns the macronized version.
-     * Uses GM_xmlhttpRequest for cross-origin requests.
-     * @param {string} text The Latin text to macronize.
-     * @returns {Promise<string>} A promise that resolves with the macronized text,
-     * or the original text if an error occurs.
+     * Validates the structure of the API response
+     * @param {Object} responseData - The parsed response data from the API
+     * @returns {Object} Validation result with isValid flag and error message
      */
-    async function macronizeText(text) {
-        const url = 'https://alatius.com/macronizer/';
-        // Form data based on the Python script
-        const params = new URLSearchParams();
-        params.append('textcontent', text);
-        params.append('macronize', 'on'); // Ensure macronization is enabled
-        params.append('scan', '0');      // Based on Python script's form_data
-        params.append('utov', 'on');      // Based on Python script's form_data ('u' to 'v' conversion?)
+    function validateApiResponse(responseData) {
+        // Check if response is an object
+        if (!responseData || typeof responseData !== 'object') {
+            return {
+                isValid: false,
+                error: 'Response is not a valid object'
+            };
+        }
 
-        console.log(`Macronizing via Alatius: "${text.substring(0, 60).replace(/\n/g, ' ')}..."`);
-        statusOverlay.updateStatus(`Sending text to Alatius macronizer...`);
+        // Check for required field
+        if (!Object.hasOwn(responseData, 'macronized_text')) {
+            return {
+                isValid: false,
+                error: 'Response missing required field: macronized_text'
+            };
+        }
 
+        // Check if macronized_text is a string
+        if (typeof responseData.macronized_text !== 'string') {
+            return {
+                isValid: false,
+                error: 'macronized_text field is not a string'
+            };
+        }
+
+        return {
+            isValid: true,
+            error: null
+        };
+    }
+
+    /**
+     * Sends text to the Latin Macronizer API and returns macronized text
+     * @param {string} text - The Latin text to macronize
+     * @returns {Promise<string>} - Promise that resolves to macronized text
+     */
+    function macronizeText(text) {
         return new Promise((resolve, reject) => {
+            const { url, ...apiParams } = API_CONFIG;
             GM_xmlhttpRequest({
-                method: "POST",
+                method: 'POST',
                 url: url,
-                data: params.toString(), // Send data as URL-encoded string
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
+                    'Content-Type': 'application/json'
                 },
-                overrideMimeType: 'text/html; charset=utf-8', // Ensure correct encoding like in Python
-                onload: function (response) {
-                    if (response.status >= 200 && response.status < 300) {
-                        try {
-                            // Parse the HTML response
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(response.responseText, 'text/html');
-
-                            // Find the element containing the macronized text (based on parse_html.py)
-                            const targetElement = doc.querySelector('div.prewrap');
-
-                            if (targetElement) {
-                                const macronized = targetElement.textContent;
-                                statusOverlay.updateStatus("Received macronized text");
-                                resolve(macronized);
-                            } else {
-                                console.error("Macronizer Error: Could not find 'div.prewrap' in Alatius response.");
-                                console.error("Response HTML (snippet):", response.responseText.substring(0, 500));
-                                statusOverlay.updateStatus("Error: Could not parse Alatius response");
-                                resolve(text); // Resolve with original text on parsing failure
+                data: JSON.stringify({
+                    text_to_macronize: text,
+                    ...apiParams
+                }),
+                onload: function(response) {
+                    try {
+                        if (response.status === 200) {
+                            const data = JSON.parse(response.responseText);
+                            
+                            // Validate response structure
+                            const validation = validateApiResponse(data);
+                            if (!validation.isValid) {
+                                console.error('Macronizer: Invalid API response structure:', validation.error);
+                                console.error('Macronizer: Received response:', data);
+                                reject(new Error(`Invalid API response: ${validation.error}`));
+                                return;
                             }
-                        } catch (parseError) {
-                            console.error("Macronizer Error: Failed to parse Alatius response.", parseError);
-                            statusOverlay.updateStatus("Error: Failed to parse response");
-                            resolve(text); // Resolve with original text on parsing error
+
+                            resolve(data.macronized_text);
+                        } else {
+                            let errorMessage = 'Unknown error';
+                            try {
+                                const errorData = JSON.parse(response.responseText);
+                                errorMessage = errorData.detail || errorData.message || 'API returned error status';
+                            } catch (parseError) {
+                                errorMessage = `HTTP ${response.status}: ${response.statusText || 'Unknown error'}`;
+                            }
+                            reject(new Error(`API Error: ${errorMessage}`));
                         }
-                    } else {
-                        console.error(`Macronizer Error: Alatius request failed with status ${response.status} ${response.statusText}`);
-                        statusOverlay.updateStatus(`Error: Request failed (${response.status})`);
-                        resolve(text); // Resolve with original text on HTTP error
+                    } catch (error) {
+                        console.error('Macronizer: Failed to parse API response:', error);
+                        console.error('Macronizer: Raw response:', response.responseText);
+                        reject(new Error(`Failed to parse response: ${error.message}`));
                     }
                 },
-                onerror: function (error) {
-                    console.error("Macronizer Error: GM_xmlhttpRequest failed.", error);
-                    statusOverlay.updateStatus("Error: Network request failed");
-                    resolve(text); // Resolve with original text on network error
-                },
-                ontimeout: function () {
-                    console.error("Macronizer Error: Request to Alatius timed out.");
-                    statusOverlay.updateStatus("Error: Request timed out");
-                    resolve(text); // Resolve with original text on timeout
+                onerror: function() {
+                    reject(new Error('Network error occurred'));
                 }
             });
         });
@@ -325,9 +356,6 @@
         'table',
         'dl', 'dt', 'dd'
     ].join(', ');
-
-    const MAX_CHUNK_CHARS = 20000;
-    const SEPARATOR = "||~#~||";
 
     async function processLatinContent() {
         statusOverlay.show();
