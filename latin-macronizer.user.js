@@ -45,18 +45,40 @@
             position: fixed;
             bottom: 20px;
             right: 20px;
-            width: 300px;
+            width: min(300px, calc(100vw - 40px));
+            max-width: 90vw;
             background: linear-gradient(135deg, #2c3e50, #1a252f);
             border-radius: 12px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             color: #ecf0f1;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            padding: 15px;
+            padding: clamp(12px, 3vw, 15px);
             z-index: 9999;
             transition: transform 0.3s ease, opacity 0.3s ease;
             transform: translateY(150%);
             opacity: 0;
         `;
+
+        // Add responsive media query styles
+        const style = document.createElement('style');
+        style.textContent = `
+            @media (max-width: 768px) {
+                #latin-macronizer-overlay {
+                    bottom: 10px !important;
+                    right: 10px !important;
+                    left: 10px !important;
+                    width: auto !important;
+                    max-width: none !important;
+                    padding: 12px !important;
+                }
+            }
+            @media (max-width: 480px) {
+                #latin-macronizer-overlay {
+                    font-size: 14px !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
 
         // Create header with logo and title
         const header = document.createElement('div');
@@ -71,7 +93,7 @@
         const logo = document.createElement('div');
         logo.innerHTML = 'Ā';  // Using a macronized A as the logo
         logo.style.cssText = `
-            font-size: 24px;
+            font-size: clamp(20px, 5vw, 24px);
             font-weight: bold;
             background: linear-gradient(135deg, #3498db, #9b59b6);
             -webkit-background-clip: text;
@@ -82,7 +104,7 @@
         const title = document.createElement('div');
         title.textContent = 'Latin Macronizer';
         title.style.cssText = `
-            font-size: 16px;
+            font-size: clamp(14px, 4vw, 16px);
             font-weight: 600;
         `;
 
@@ -95,13 +117,14 @@
             font-size: 18px;
             font-weight: bold;
             opacity: 0.8;
-            width: 24px;
-            height: 24px;
+            width: clamp(24px, 6vw, 32px);
+            height: clamp(24px, 6vw, 32px);
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
             transition: background-color 0.2s ease;
+            touch-action: manipulation;
         `;
         minimizeBtn.addEventListener('mouseover', () => {
             minimizeBtn.style.backgroundColor = 'rgba(236, 240, 241, 0.2)';
@@ -119,8 +142,9 @@
         statusText.textContent = 'Starting...';
         statusText.style.cssText = `
             margin-bottom: 10px;
-            font-size: 14px;
+            font-size: clamp(12px, 3.5vw, 14px);
             color: #bdc3c7;
+            word-wrap: break-word;
         `;
 
         // Create progress section
@@ -136,7 +160,7 @@
         progressLabel.style.cssText = `
             display: flex;
             justify-content: space-between;
-            font-size: 12px;
+            font-size: clamp(10px, 3vw, 12px);
             color: #bdc3c7;
         `;
 
@@ -151,7 +175,7 @@
         const progressBar = document.createElement('div');
         progressBar.style.cssText = `
             width: 100%;
-            height: 8px;
+            height: clamp(6px, 2vw, 8px);
             border-radius: 4px;
             background-color: rgba(236, 240, 241, 0.2);
             overflow: hidden;
