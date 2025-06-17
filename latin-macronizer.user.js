@@ -258,7 +258,7 @@
         }
 
         // Check for required field
-        if (!responseData.hasOwnProperty('macronized_text')) {
+        if (!Object.hasOwn(responseData, 'macronized_text')) {
             return {
                 isValid: false,
                 error: 'Response missing required field: macronized_text'
