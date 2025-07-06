@@ -377,16 +377,76 @@
         'dl', 'dt', 'dd'
     ].join(', ');
 
-    async function processLatinContent() {
-        statusOverlay.show();
-        statusOverlay.updateStatus("Scanning page for Latin text...");
+    // Global state to prevent concurrent processing and track content
+    let isProcessing = false;
+    let lastContentHash = null;
 
-        const contentArea = document.querySelector(contentSelector);
-        if (!contentArea) {
-            console.log("Macronizer: Content area not found.");
-            statusOverlay.updateStatus("Error: Content area not found");
+    /**
+     * Generates a hash of the text content to detect actual content changes
+     * @param {Element} contentArea - The content area to hash
+     * @returns {string} Hash of the content
+     */
+    function generateContentHash(contentArea) {
+        const walker = document.createTreeWalker(
+            contentArea,
+            NodeFilter.SHOW_TEXT,
+            {
+                acceptNode: function (node) {
+                    if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+                    if (node.parentElement.closest(excludeSelectors)) return NodeFilter.FILTER_REJECT;
+                    if (!/[aeiouyAEIOUYāēīōūȳĀĒĪŌŪȲ]/.test(node.nodeValue)) return NodeFilter.FILTER_REJECT;
+                    return NodeFilter.FILTER_ACCEPT;
+                }
+            },
+            false
+        );
+
+        const textNodes = [];
+        let currentNode;
+        while (currentNode = walker.nextNode()) {
+            textNodes.push(currentNode.nodeValue.trim());
+        }
+        
+        // Simple hash function
+        const content = textNodes.join('|');
+        let hash = 0;
+        for (let i = 0; i < content.length; i++) {
+            const char = content.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return hash.toString();
+    }
+
+    async function processLatinContent() {
+        // Prevent concurrent processing
+        if (isProcessing) {
+            console.log("Macronizer: Already processing, skipping...");
             return;
         }
+
+        try {
+            statusOverlay.show();
+            statusOverlay.updateStatus("Scanning page for Latin text...");
+
+            const contentArea = document.querySelector(contentSelector);
+            if (!contentArea) {
+                console.log("Macronizer: Content area not found.");
+                statusOverlay.updateStatus("Error: Content area not found");
+                return;
+            }
+
+            // Check if content has actually changed
+            const currentContentHash = generateContentHash(contentArea);
+            if (lastContentHash !== null && currentContentHash === lastContentHash) {
+                console.log("Macronizer: Content unchanged, skipping processing...");
+                statusOverlay.hide();
+                return;
+            }
+
+            console.log(`Macronizer: Content changed (hash: ${lastContentHash} -> ${currentContentHash}), proceeding with processing...`);
+            isProcessing = true;
+            lastContentHash = currentContentHash;
 
         const nodesToProcess = [];
         const walker = document.createTreeWalker(
@@ -421,7 +481,7 @@
             console.log("Macronizer: No relevant text nodes found to process.");
             statusOverlay.updateStatus("No Latin text found to process");
             setTimeout(() => statusOverlay.hide(), 3000);
-            return;
+            return; // isProcessing will be reset in finally block
         }
 
         statusOverlay.updateStatus(`Found ${nodesToProcess.length} Latin text fragments`);
@@ -506,32 +566,60 @@
             } catch (error) {
                 console.error(`Macronizer: Error processing chunk ${i + 1}:`, error);
                 statusOverlay.updateStatus(`Error processing batch ${i + 1}`);
+                // Continue processing other chunks even if one fails
             }
         }
 
         console.log(`Macronizer: Finished. Checked ${processedCount} nodes, modified ${modifiedCount} nodes out of ${nodesToProcess.length} total relevant nodes.`);
         statusOverlay.updateStatus(`Completed! Modified ${modifiedCount} of ${nodesToProcess.length} text fragments.`);
         statusOverlay.setCompleted();
+        
+        } catch (error) {
+            console.error("Macronizer: Unexpected error during processing:", error);
+            statusOverlay.updateStatus("An unexpected error occurred");
+            setTimeout(() => statusOverlay.hide(), 3000);
+        } finally {
+            // Always reset processing state
+            isProcessing = false;
+        }
     }
 
     let debounceTimer;
     const observer = new MutationObserver(mutations => {
         let relevantChange = false;
+        
         for (const mutation of mutations) {
             if (mutation.type === 'childList') {
-                if (mutation.addedNodes.length > 0) {
-                    relevantChange = true;
-                    break;
+                // Check if added nodes contain potential Latin text
+                for (const node of mutation.addedNodes) {
+                    if (node.nodeType === Node.ELEMENT_NODE || node.nodeType === Node.TEXT_NODE) {
+                        // Skip if the added node is in an excluded area
+                        if (node.nodeType === Node.ELEMENT_NODE && node.closest && node.closest(excludeSelectors)) {
+                            continue;
+                        }
+                        if (node.parentElement && node.parentElement.closest(excludeSelectors)) {
+                            continue;
+                        }
+                        
+                        // Check for potential Latin content
+                        const textContent = node.textContent || node.nodeValue || '';
+                        if (textContent.trim() && /[aeiouyAEIOUYāēīōūȳĀĒĪŌŪȲ]/.test(textContent)) {
+                            relevantChange = true;
+                            break;
+                        }
+                    }
                 }
+                
+                if (relevantChange) break;
             }
         }
 
-        if (relevantChange) {
+        if (relevantChange && !isProcessing) {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
-                console.log("Macronizer: Detected DOM changes, re-processing content...");
+                console.log("Macronizer: Detected relevant DOM changes, re-processing content...");
                 processLatinContent();
-            }, 1000);
+            }, 2000); // Increased debounce time for better stability
         }
     });
 
