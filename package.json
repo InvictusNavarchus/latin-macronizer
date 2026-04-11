@@ -1,4 +1,7 @@
 {
+  "name": "latin-macronizer",
+  "version": "0.8.0",
+  "description": "Macronizes Latin text on la.wikipedia.org using alatius macronizer",
   "dependencies": {},
   "devDependencies": {
     "typescript": "^6.0.2",
